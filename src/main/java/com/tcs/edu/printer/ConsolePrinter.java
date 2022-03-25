@@ -1,6 +1,8 @@
+package com.tcs.edu.printer;
+
 /**
  * @author Midov Alim
- * @apiNote Класс ConsolePrinter предназначен для аггрегации полей и методов для обработки сообщения и последующего вывода информации на консоль
+ * @apiNote Класс com.tcs.edu.printer.ConsolePrinter предназначен для аггрегации полей и методов для обработки сообщения и последующего вывода информации на консоль
  * @version 1.0.0
  */
 public class ConsolePrinter {
