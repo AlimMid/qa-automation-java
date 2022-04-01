@@ -12,8 +12,10 @@ public class TimestampMessageDecorator {
      *
      * @param message (String), произвольная строка над которым будут совершены определенные действия
      * @return (String) строка, которая содержит текущее время плюс исходная строка переданная в аргументе
+     * @apiNote Метод содержит локальную переменную decoratedMessage, в которой хранится строка - склейка текущего времени и сообщения
      */
     public static String decorate(String message) {
-        return Instant.now() + " " + message;
+        String decoratedMessage = Instant.now() + " " + message;
+        return decoratedMessage;
     }
 }
