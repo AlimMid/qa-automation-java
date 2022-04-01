@@ -8,6 +8,7 @@ import java.time.Instant;
  */
 public class TimestampMessageDecorator {
 
+    static Integer messageCount = 0;
     /**
      *
      * @param message (String), произвольная строка над которым будут совершены определенные действия
@@ -15,7 +16,8 @@ public class TimestampMessageDecorator {
      * @apiNote Метод содержит локальную переменную decoratedMessage, в которой хранится строка - склейка текущего времени и сообщения
      */
     public static String decorate(String message) {
-        String decoratedMessage = Instant.now() + " " + message;
+        messageCount++;
+        String decoratedMessage = messageCount + " " + Instant.now() + " " + message;
         return decoratedMessage;
     }
 }
