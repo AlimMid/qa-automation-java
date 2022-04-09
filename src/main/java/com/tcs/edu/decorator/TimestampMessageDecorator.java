@@ -7,7 +7,7 @@ import java.time.Instant;
  * @apiNote Класс содержит единственный метод добавляющий текущее время к заданной строке
  */
 public class TimestampMessageDecorator {
-
+    static Integer PAGE_SIZE = 4;
     static Integer messageCount = 0;
     /**
      *
@@ -17,6 +17,10 @@ public class TimestampMessageDecorator {
      */
     public static String decorate(String message) {
         messageCount++;
-        return String.format("%d %s %s", messageCount, Instant.now(), message);
+        var decoratedMessage = String.format("%3d %s %s", messageCount, Instant.now(), message);
+        if (messageCount % PAGE_SIZE == 0) {
+            decoratedMessage = String.format("%s%s", decoratedMessage, "\n---");
+        }
+        return decoratedMessage;
     }
 }
