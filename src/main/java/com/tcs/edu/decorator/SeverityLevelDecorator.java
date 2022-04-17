@@ -12,14 +12,11 @@ public class SeverityLevelDecorator {
 
     /**
      * @param severity Enum (MAJOR, REGULAR, MINOR)
-     * @return (! ! !), (!) или () в зависимости от значения severity. Default: severity = MINOR
-     * @apiNote Метод преобразует уровень важности в строковое прредставление
+     * @return (! ! !), (!) или () в зависимости от значения severity
+     * @apiNote Метод преобразует уровень важности в строковое представление
      */
     public static String mapToString(Severity severity) {
         String severityString = null;
-        if (severity == null) {
-            severity = MINOR;
-        }
         switch (severity) {
             case MAJOR: {
                 severityString = "(!!!)";

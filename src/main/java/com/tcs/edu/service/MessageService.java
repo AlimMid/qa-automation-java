@@ -9,8 +9,15 @@ public class MessageService {
 
     /**
      * @apiNote Сервис преобразования строки и вывода на консоль
+     * @param level уровень важности
+     * @param message сообщение, которое необходимо вывести
+     * @param messages дополнительные сообщения, которые необходимо вывести
+     * @implNote при незаданном level, выводятся сообщения с level=MINOR
      */
     public static void process(Severity level, String message, String... messages) {
+        if (level == null) {
+            level = Severity.MINOR;
+        }
         print(decorate(String.format("%s %s", message, mapToString(level))));
         for (String currentMessage : messages) {
             print(decorate(String.format("%s %s", currentMessage, mapToString(level))));
