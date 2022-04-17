@@ -10,13 +10,14 @@ public class MessageService {
     /**
      * @apiNote Сервис преобразования строки и вывода на консоль
      */
-    public static void process(Severity level, String... messages) {
+    public static void process(Severity level, String message, String... messages) {
+        print(decorate(String.format("%s %s", message, mapToString(level))));
         for (String currentMessage : messages) {
             print(decorate(String.format("%s %s", currentMessage, mapToString(level))));
         }
     }
 
-    public static void process(String... messages) {
-        process(null, messages);
+    public static void process(String message, String... messages) {
+        process(null, message, messages);
     }
 }
