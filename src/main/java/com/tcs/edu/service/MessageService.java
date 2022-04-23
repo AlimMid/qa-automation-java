@@ -18,9 +18,13 @@ public class MessageService {
         if (level == null) {
             level = Severity.MINOR;
         }
-        print(decorate(String.format("%s %s", message, mapToString(level))));
+        if (!(message == null)) {
+            print(decorate(String.format("%s %s", message, mapToString(level))));
+        }
         for (String currentMessage : messages) {
-            print(decorate(String.format("%s %s", currentMessage, mapToString(level))));
+            if (!(currentMessage == null)) {
+                print(decorate(String.format("%s %s", currentMessage, mapToString(level))));
+            }
         }
     }
 
