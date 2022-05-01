@@ -2,71 +2,54 @@ package com.tcs.edu.service;
 
 import com.tcs.edu.decorator.Doubling;
 import com.tcs.edu.decorator.MessageOrder;
-import com.tcs.edu.decorator.Severity;
-
+import com.tcs.edu.domain.Message;
 import static com.tcs.edu.decorator.SeverityLevelDecorator.mapToString;
 import static com.tcs.edu.decorator.TimestampMessageDecorator.decorate;
+import static com.tcs.edu.decorator.TimestampMessageDecorator.resetCounter;
 import static com.tcs.edu.printer.ConsolePrinter.print;
 
 public class MessageService {
 
     /**
-     * @param level        уровень важности
      * @param messageOrder порядок вывода сообщений
      * @param doubling     признак дедупликации сообщений
-     * @param messages     дополнительные сообщения, которые необходимо вывести
-     * @apiNote Сервис преобразования сообщений и вывода на консоль
-     * //     * @implNote при незаданном level выводятся сообщения с level=MINOR,
-     * //     * при незаданном messageOrder сообщения выводятся в порядке messages
+     * @param messages     список объектов Message
+     * @apiNote Сервис преобразования сообщений и вывода
      */
-    public static void log(Severity level, MessageOrder messageOrder, Doubling doubling, String... messages) {
+    public static void log(MessageOrder messageOrder, Doubling doubling, Message... messages) {
         if (doubling != null) {
             if (doubling.equals(Doubling.DOUBLES)) {
-                log(level, messageOrder, messages);
+                log(messageOrder, messages);
             } else if (doubling.equals(Doubling.DISTINCT)) {
-                log(level, messageOrder, deduplicate(messages));
+                log(messageOrder, deduplicate(messages));
             }
         }
     }
 
-    public static void log(Severity level, MessageOrder messageOrder, String... messages) {
+    public static void log(MessageOrder messageOrder, Message... messages) {
         if (messageOrder != null) {
             if (messageOrder.equals(MessageOrder.ASC)) {
-                log(level, messages);
+                log(messages);
             } else if (messageOrder.equals(MessageOrder.DESC)) {
-                log(level, reverse(messages));
+                log(reverse(messages));
             }
         }
     }
 
-    public static void log(Severity level, String... messages) {
-        if (level != null && messages != null && messages.length != 0) {
-            for (String currentMessage : messages) {
+    public static void log(Message... messages) {
+        if (messages != null && messages.length != 0) {
+            for (Message currentMessage : messages) {
                 if (currentMessage != null) {
-                    print(decorate(String.format("%s %s", currentMessage, mapToString(level))));
+                    print(decorate(String.format("%s %s", currentMessage.getBody(), mapToString(currentMessage.getSeverity()))));
                 }
             }
+            resetCounter();
+            System.out.println("-----------------------------------------------------");
         }
     }
 
-    public static void log(MessageOrder messageOrder, Doubling doubling, String... messages) {
-        log(Severity.MINOR, messageOrder, doubling, messages);
-    }
-
-    public static void log(Severity level, Doubling doubling, String... messages) {
-        log(level, MessageOrder.ASC, doubling, messages);
-    }
-
-    public static void log(Doubling doubling, String... messages) {
-        log(Severity.MINOR, MessageOrder.ASC, doubling, messages);
-    }
-
-    public static void log(MessageOrder messageOrder, String... messages) {
-        log(Severity.MINOR, messageOrder, Doubling.DOUBLES, messages);
-    }
-
-    public static void log(String... messages) {
-        log(Severity.MINOR, MessageOrder.ASC, Doubling.DOUBLES, messages);
+    public static void log(Doubling doubling, Message... messages) {
+        log(MessageOrder.ASC, doubling, messages);
     }
 
     /**
@@ -74,8 +57,8 @@ public class MessageService {
      * @return массив сообщений без дубликатов
      * @implNote Дедупликатор сообщений
      */
-    public static String[] deduplicate(String... messages) {
-        String[] messagesOutput = new String[messages.length];
+    public static Message[] deduplicate(Message... messages) {
+        Message[] messagesOutput = new Message[messages.length];
         if (messages.length != 0) {
             messagesOutput[0] = messages[0];
             int k = 1;
@@ -94,9 +77,9 @@ public class MessageService {
      * @return массив сообщений в обратном порядке
      * @implNote реверс массива сообщений
      */
-    private static String[] reverse(String... messages) {
+    private static Message[] reverse(Message... messages) {
         int k = messages.length;
-        String[] messagesReverse = new String[k];
+        Message[] messagesReverse = new Message[k];
         for (int i = 0; i < k; i++) {
             messagesReverse[i] = messages[k - i - 1];
         }
@@ -104,15 +87,18 @@ public class MessageService {
     }
 
     /**
-     * @param message  String
-     * @param messages String[]
+     * @param message  Message
+     * @param messages Message[]
      * @return boolean, если message содержится в массиве messages, то true, иначе false
-     * @implNote Метод проверяет вхождение строки в массив строк
+     * @implNote Метод проверяет cовпадение поля body объекта message с полем body одного из объектов массива messages.
+     * Если message = null или не найдено ни одного совпадения, то возвращает false.
      */
-    public static boolean checkContains(String message, String[] messages) {
-        for (String s : messages) {
-            if (s != null && s.equals(message)) {
-                return true;
+    public static boolean checkContains(Message message, Message[] messages) {
+        if (message != null) {
+            for (Message s : messages) {
+                if (s != null && s.getBody().equals(message.getBody())) {
+                    return true;
+                }
             }
         }
         return false;
