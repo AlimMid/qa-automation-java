@@ -1,12 +1,11 @@
 package com.tcs.edu;
 
 import com.tcs.edu.decorator.Doubling;
-import com.tcs.edu.decorator.MessageOrder;
-import com.tcs.edu.decorator.Severity;
-import com.tcs.edu.service.MessageService;
-
-import static com.tcs.edu.decorator.Doubling.*;
-import static com.tcs.edu.decorator.MessageOrder.*;
+import com.tcs.edu.domain.Message;
+import static com.tcs.edu.decorator.Doubling.DISTINCT;
+import static com.tcs.edu.decorator.Doubling.DOUBLES;
+import static com.tcs.edu.decorator.MessageOrder.ASC;
+import static com.tcs.edu.decorator.MessageOrder.DESC;
 import static com.tcs.edu.decorator.Severity.*;
 import static com.tcs.edu.service.MessageService.log;
 
@@ -15,35 +14,33 @@ import static com.tcs.edu.service.MessageService.log;
  */
 class Application {
     public static void main(String[] args) {
-        log(MAJOR, ASC, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(MINOR, DESC, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(REGULAR, DESC, DISTINCT,"Zero0", "Hi! 1", "Hi! 1", "Zero4");
-        log(REGULAR, DESC, DISTINCT,"Zero0", null, null, "Zero4");
+        Message messageMin = new Message(MINOR, "Message with MINOR severity");
+        Message messageReg = new Message(REGULAR, "Message with REGULAR severity");
+        Message messageMaj = new Message(MAJOR, "Message with MAJOR severity");
+        Message messageDef = new Message("Message with NO severity");
+        Message messageErr = new Message("Это сообщение не должно выводиться");
 
-        log(REGULAR, DESC, DISTINCT);
-        log(MAJOR, ASC, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(MAJOR, DISTINCT,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(ASC, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(MAJOR, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(DESC, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(DISTINCT, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log("Zero", "Hi! 1", "Hi! 1", "What's up! 3");
+        log(null, DOUBLES, messageErr);
+        log(ASC, (Doubling) null, messageErr);
+        log((Doubling) null, messageErr);
+        log(null, (Doubling) null, messageErr);
+        log(DISTINCT,null, null, null, null);
+        log(ASC, DOUBLES);
+        log(ASC);
+        log(DOUBLES);
+        log();
+        log(null, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
+        log(ASC, (Doubling) null, messageMin, messageReg, messageMaj, messageDef);
+        log((Doubling) null, messageMin, messageReg, messageMaj, messageDef);
+        log(null, (Doubling) null, messageMin, messageReg, messageMaj, messageDef);
 
-        log(null, ASC, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(MAJOR, null, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(MAJOR, ASC, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log((Severity) null, DOUBLES, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(null, ASC, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log((MessageOrder) null, DOUBLES, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(MAJOR, (MessageOrder) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(ASC, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(MAJOR, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(null, null, DOUBLES, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(null, (MessageOrder) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(null, ASC, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log((MessageOrder) null, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(MAJOR, null, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log((MessageOrder) null, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        log(null, null, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
+        log(ASC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
+        log(DESC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
+        log(DESC, DISTINCT, null, messageReg, null, messageDef, null, messageDef, messageDef, null);
+        log(DOUBLES, messageMin, messageReg, messageReg);
+        log(ASC, messageMin, messageReg, messageReg);
+        log(messageMin, messageReg, messageMin, messageDef);
+
+        log(DISTINCT,null, null, null, null);
     }
 }
