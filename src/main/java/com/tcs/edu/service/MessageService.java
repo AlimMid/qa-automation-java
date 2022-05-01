@@ -19,27 +19,27 @@ public class MessageService {
      * //     * @implNote при незаданном level выводятся сообщения с level=MINOR,
      * //     * при незаданном messageOrder сообщения выводятся в порядке messages
      */
-    public static void process(Severity level, MessageOrder messageOrder, Doubling doubling, String... messages) {
+    public static void log(Severity level, MessageOrder messageOrder, Doubling doubling, String... messages) {
         if (doubling != null) {
             if (doubling.equals(Doubling.DOUBLES)) {
-                process(level, messageOrder, messages);
+                log(level, messageOrder, messages);
             } else if (doubling.equals(Doubling.DISTINCT)) {
-                process(level, messageOrder, deduplicate(messages));
+                log(level, messageOrder, deduplicate(messages));
             }
         }
     }
 
-    public static void process(Severity level, MessageOrder messageOrder, String... messages) {
+    public static void log(Severity level, MessageOrder messageOrder, String... messages) {
         if (messageOrder != null) {
             if (messageOrder.equals(MessageOrder.ASC)) {
-                process(level, messages);
+                log(level, messages);
             } else if (messageOrder.equals(MessageOrder.DESC)) {
-                process(level, reverse(messages));
+                log(level, reverse(messages));
             }
         }
     }
 
-    public static void process(Severity level, String... messages) {
+    public static void log(Severity level, String... messages) {
         if (level != null && messages != null && messages.length != 0) {
             for (String currentMessage : messages) {
                 if (currentMessage != null) {
@@ -49,24 +49,24 @@ public class MessageService {
         }
     }
 
-    public static void process(MessageOrder messageOrder, Doubling doubling, String... messages) {
-        process(Severity.MINOR, messageOrder, doubling, messages);
+    public static void log(MessageOrder messageOrder, Doubling doubling, String... messages) {
+        log(Severity.MINOR, messageOrder, doubling, messages);
     }
 
-    public static void process(Severity level, Doubling doubling, String... messages) {
-        process(level, MessageOrder.ASC, doubling, messages);
+    public static void log(Severity level, Doubling doubling, String... messages) {
+        log(level, MessageOrder.ASC, doubling, messages);
     }
 
-    public static void process(Doubling doubling, String... messages) {
-        process(Severity.MINOR, MessageOrder.ASC, doubling, messages);
+    public static void log(Doubling doubling, String... messages) {
+        log(Severity.MINOR, MessageOrder.ASC, doubling, messages);
     }
 
-    public static void process(MessageOrder messageOrder, String... messages) {
-        process(Severity.MINOR, messageOrder, Doubling.DOUBLES, messages);
+    public static void log(MessageOrder messageOrder, String... messages) {
+        log(Severity.MINOR, messageOrder, Doubling.DOUBLES, messages);
     }
 
-    public static void process(String... messages) {
-        process(Severity.MINOR, MessageOrder.ASC, Doubling.DOUBLES, messages);
+    public static void log(String... messages) {
+        log(Severity.MINOR, MessageOrder.ASC, Doubling.DOUBLES, messages);
     }
 
     /**
