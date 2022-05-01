@@ -4,7 +4,7 @@ import java.time.Instant;
 
 /**
  * @author a.midov
- * @apiNote Класс содержит единственный метод добавляющий текущее время к заданной строке
+ * @apiNote Класс содержит метод, добавляющий текущее время к заданной строке, а также методы инкремента и сброса счетчика
  */
 public class TimestampMessageDecorator {
     static Integer PAGE_SIZE = 4;
@@ -27,5 +27,8 @@ public class TimestampMessageDecorator {
 
     public static void updateCounter() {
         messageCount++;
+    }
+    public static void resetCounter() {
+        messageCount = 0;
     }
 }
