@@ -6,16 +6,25 @@ import com.tcs.edu.printer.ConsolePrinter;
 import com.tcs.edu.printer.Printer;
 
 public class OrderedDistinctedMessageService implements MessageService {
-    private final Printer printer = new ConsolePrinter();
-    private final MessageDecorator decorator = new TimestampMessageDecorator();
+    private final Printer printer;
+    private final MessageDecorator decorator;
     private final SeverityLevelMapper levelMapper = new SeverityLevelMapper();
 
-    /**
-     * @param messageOrder порядок вывода сообщений
-     * @param doubling     признак дедупликации сообщений
-     * @param messages     список объектов Message
-     * @apiNote Сервис преобразования сообщений и вывода
-     */
+    public OrderedDistinctedMessageService(Printer printer, MessageDecorator decorator) {
+        this.printer = printer;
+        this.decorator = decorator;
+    }
+
+    public OrderedDistinctedMessageService() {
+        this(new ConsolePrinter(), new TimestampMessageDecorator());
+    }
+
+        /**
+         * @param messageOrder порядок вывода сообщений
+         * @param doubling     признак дедупликации сообщений
+         * @param messages     список объектов Message
+         * @apiNote Сервис преобразования сообщений и вывода
+         */
     @Override
     public void log(MessageOrder messageOrder, Doubling doubling, Message... messages) {
         if (doubling != null) {
