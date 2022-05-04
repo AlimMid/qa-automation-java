@@ -2,6 +2,11 @@ package com.tcs.edu.domain;
 
 import com.tcs.edu.decorator.Severity;
 
+/**
+ * Класс, описывающий структуру сообщения.
+ * body - тело сообщения
+ * severity - важность сообщения
+ */
 public class Message {
     String body;
     Severity severity;
