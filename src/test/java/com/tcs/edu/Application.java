@@ -1,7 +1,9 @@
 package com.tcs.edu;
 
 import com.tcs.edu.decorator.Doubling;
+import com.tcs.edu.decorator.TimestampMessageDecorator;
 import com.tcs.edu.domain.Message;
+import com.tcs.edu.printer.ConsolePrinter;
 import com.tcs.edu.service.MessageService;
 import com.tcs.edu.service.OrderedDistinctedMessageService;
 
@@ -16,7 +18,10 @@ import static com.tcs.edu.decorator.Severity.*;
  */
 class Application {
     public static void main(String[] args) {
-        MessageService messageService = new OrderedDistinctedMessageService();
+        MessageService messageService = new OrderedDistinctedMessageService(
+                new ConsolePrinter(),
+                new TimestampMessageDecorator()
+        );
         Message messageMin = new Message(MINOR, "Message with MINOR severity");
         Message messageReg = new Message(REGULAR, "Message with REGULAR severity");
         Message messageMaj = new Message(MAJOR, "Message with MAJOR severity");
