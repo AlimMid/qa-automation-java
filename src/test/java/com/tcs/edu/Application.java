@@ -1,12 +1,16 @@
 package com.tcs.edu;
 
 import com.tcs.edu.decorator.Doubling;
-import com.tcs.edu.decorator.MessageOrder;
-import com.tcs.edu.decorator.Severity;
+import com.tcs.edu.decorator.TimestampMessageDecorator;
+import com.tcs.edu.domain.Message;
+import com.tcs.edu.printer.ConsolePrinter;
 import com.tcs.edu.service.MessageService;
+import com.tcs.edu.service.OrderedDistinctedMessageService;
 
-import static com.tcs.edu.decorator.Doubling.*;
-import static com.tcs.edu.decorator.MessageOrder.*;
+import static com.tcs.edu.decorator.Doubling.DISTINCT;
+import static com.tcs.edu.decorator.Doubling.DOUBLES;
+import static com.tcs.edu.decorator.MessageOrder.ASC;
+import static com.tcs.edu.decorator.MessageOrder.DESC;
 import static com.tcs.edu.decorator.Severity.*;
 
 /**
@@ -14,35 +18,37 @@ import static com.tcs.edu.decorator.Severity.*;
  */
 class Application {
     public static void main(String[] args) {
-        MessageService.process(MAJOR, ASC, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(MINOR, DESC, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(REGULAR, DESC, DISTINCT,"Zero0", "Hi! 1", "Hi! 1", "Zero4");
-        MessageService.process(REGULAR, DESC, DISTINCT,"Zero0", null, null, "Zero4");
+        MessageService messageService = new OrderedDistinctedMessageService(
+                new ConsolePrinter(),
+                new TimestampMessageDecorator()
+        );
+        Message messageMin = new Message(MINOR, "Message with MINOR severity");
+        Message messageReg = new Message(REGULAR, "Message with REGULAR severity");
+        Message messageMaj = new Message(MAJOR, "Message with MAJOR severity");
+        Message messageDef = new Message("Message with NO severity");
+        Message messageErr = new Message("Это сообщение не должно выводиться");
 
-        MessageService.process(REGULAR, DESC, DISTINCT);
-        MessageService.process(MAJOR, ASC, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(MAJOR, DISTINCT,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(ASC, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(MAJOR, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(DESC, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(DISTINCT, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process("Zero", "Hi! 1", "Hi! 1", "What's up! 3");
+        messageService.log(null, DOUBLES, messageErr);
+        messageService.log(ASC, (Doubling) null, messageErr);
+        messageService.log((Doubling) null, messageErr);
+        messageService.log(null, (Doubling) null, messageErr);
+        messageService.log(DISTINCT,null, null, null, null);
+        messageService.log(ASC, DOUBLES);
+        messageService.log(ASC);
+        messageService.log(DOUBLES);
+        messageService.log();
+        messageService.log(null, DOUBLES, messageErr);
+        messageService.log(ASC, (Doubling) null, messageErr);
+        messageService.log((Doubling) null, messageErr);
+        messageService.log(null, (Doubling) null, messageErr);
 
-        MessageService.process(null, ASC, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(MAJOR, null, DOUBLES,"Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(MAJOR, ASC, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process((Severity) null, DOUBLES, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(null, ASC, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process((MessageOrder) null, DOUBLES, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(MAJOR, (MessageOrder) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(ASC, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(MAJOR, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(null, null, DOUBLES, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(null, (MessageOrder) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(null, ASC, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process((MessageOrder) null, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(MAJOR, null, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process((MessageOrder) null, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
-        MessageService.process(null, null, (Doubling) null, "Zero", "Hi! 1", "Hi! 1", "What's up! 3");
+        messageService.log(ASC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
+        messageService.log(DESC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
+        messageService.log(DESC, DISTINCT, null, messageReg, null, messageDef, null, messageDef, messageDef, null);
+        messageService.log(DOUBLES, messageMin, messageReg, messageReg);
+        messageService.log(ASC, messageMin, messageReg, messageReg);
+        messageService.log(messageMin, messageReg, messageMin, messageDef);
+
+        messageService.log(DISTINCT,null, null, null, null);
     }
 }
