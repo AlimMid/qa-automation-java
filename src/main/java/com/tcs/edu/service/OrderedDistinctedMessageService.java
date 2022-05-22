@@ -35,7 +35,6 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
         } catch (IllegalArgumentException e) {
             throw new LogException("notValidArgMessage", e);
         }
-        super.isArgValid(doubling);
         if (doubling.equals(Doubling.DOUBLES)) {
             log(messageOrder, messages);
         } else if (doubling.equals(Doubling.DISTINCT)) {
@@ -75,7 +74,6 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
             printer.print(decorator.decorate(String.format("%s %s", currentMessage.getBody(),
                     levelMapper.mapToString(currentMessage.getSeverity()))));
         }
-
 
         decorator.resetCounter();
         System.out.println("-----------------------------------------------------");
