@@ -6,6 +6,8 @@ import com.tcs.edu.domain.Message;
 import com.tcs.edu.printer.ConsolePrinter;
 import com.tcs.edu.service.MessageService;
 import com.tcs.edu.service.OrderedDistinctedMessageService;
+import com.tcs.edu.validator.LogException;
+
 import static com.tcs.edu.decorator.Doubling.DISTINCT;
 import static com.tcs.edu.decorator.Doubling.DOUBLES;
 import static com.tcs.edu.decorator.MessageOrder.ASC;
@@ -26,31 +28,95 @@ class Application {
         Message messageMaj = new Message(MAJOR, "Message with MAJOR severity");
         Message messageDef = new Message("Message with NO severity");
         Message messageErr = new Message("Это сообщение не должно выводиться");
+        Message messageEmpty = new Message("");
 
-        messageService.log(null, DOUBLES, messageErr);
-        messageService.log(ASC, (Doubling) null, messageErr);
-        messageService.log((Doubling) null, messageErr);
-        messageService.log(null, (Doubling) null, messageErr);
-        messageService.log(DISTINCT,null, null, null, null);
-        messageService.log(ASC, DOUBLES);
-        messageService.log(ASC);
-        messageService.log(DOUBLES);
-        messageService.log();
-        messageService.log(null, DOUBLES, messageErr);
-        messageService.log(ASC, (Doubling) null, messageErr);
-        messageService.log((Doubling) null, messageErr);
-        messageService.log(null, (Doubling) null, messageErr);
+        // блок вызовов для проверки валидации
+        {
+            try {
+                messageService.log(null, DOUBLES, messageErr);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(ASC, (Doubling) null, messageErr);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log((Doubling) null, messageErr);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(null, (Doubling) null, messageErr);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(DISTINCT,null, null, null, null);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(ASC, DOUBLES);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(ASC, DOUBLES, messageDef, messageEmpty);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(ASC);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(DOUBLES);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log();
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(null, DOUBLES, messageErr);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(ASC, (Doubling) null, messageErr);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log((Doubling) null, messageErr);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(null, (Doubling) null, messageErr);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+            try {
+                messageService.log(DESC, DISTINCT, null, messageReg, null, messageDef, null, messageDef, messageDef, null);
+            } catch (LogException e) {
+                e.printStackTrace();
+            }
+        }
 
+        // блок позитивных кейсов
         messageService.log(ASC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
         messageService.log(DESC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
-        messageService.log(DESC, DISTINCT, null, messageReg, null, messageDef, null, messageDef, messageDef, null);
         messageService.log(DOUBLES, messageMin, messageReg, messageReg);
         messageService.log(ASC, messageMin, messageReg, messageReg);
         messageService.log(messageMin, messageReg, messageMin, messageDef);
 
-        messageService.log(DISTINCT,null, null, null, null);
-
-        //task9.2: тесты
+        // task9.2: тесты
         Message minorWarning1 = new Message(MINOR, "This is a warning");
         Message minorWarning2 = new Message(MINOR, "This is a warning");
         Message majorWarning = new Message(MAJOR, "This is a warning");
