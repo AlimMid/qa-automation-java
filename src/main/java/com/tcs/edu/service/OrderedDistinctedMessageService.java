@@ -4,6 +4,7 @@ import com.tcs.edu.decorator.*;
 import com.tcs.edu.domain.Message;
 import com.tcs.edu.printer.ConsolePrinter;
 import com.tcs.edu.printer.Printer;
+import com.tcs.edu.validator.LogException;
 import com.tcs.edu.validator.ValidatingService;
 
 public class OrderedDistinctedMessageService extends ValidatingService implements MessageService {
@@ -27,9 +28,12 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
      * @apiNote Сервис преобразования сообщений и вывода
      */
     @Override
-    public void log(MessageOrder messageOrder, Doubling doubling, Message... messages) {
-        if (isArgNotValid(doubling)) {
-            return;
+    public void log(MessageOrder messageOrder, Doubling doubling, Message... messages)
+            throws LogException {
+        try {
+            super.isArgValid(doubling);
+        } catch (IllegalArgumentException e) {
+            throw new LogException("notValidArgMessage", e);
         }
         if (doubling.equals(Doubling.DOUBLES)) {
             log(messageOrder, messages);
@@ -40,8 +44,10 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
 
     @Override
     public void log(MessageOrder messageOrder, Message... messages) {
-        if (isArgNotValid(messageOrder)) {
-            return;
+        try {
+            super.isArgValid(messageOrder);
+        } catch (IllegalArgumentException e) {
+            throw new LogException("notValidArgMessage", e);
         }
         if (messageOrder.equals(MessageOrder.ASC)) {
             log(messages);
@@ -52,16 +58,23 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
 
     @Override
     public void log(Message... messages) {
-        if (isArgNotValid(messages)) {
-            return;
+        try {
+            super.isArgValid(messages);
+        } catch (IllegalArgumentException e) {
+            throw new LogException("notValidArgMessage", e);
         }
         for (Message currentMessage : messages) {
-            if (isArgNotValid(currentMessage)) {
-                continue;
+            try {
+                super.isArgValid(currentMessage);
+            } catch (IllegalArgumentException e) {
+                throw new LogException("notValidArgMessage", e);
             }
+        }
+        for (Message currentMessage : messages) {
             printer.print(decorator.decorate(String.format("%s %s", currentMessage.getBody(),
                     levelMapper.mapToString(currentMessage.getSeverity()))));
         }
+
         decorator.resetCounter();
         System.out.println("-----------------------------------------------------");
     }
