@@ -14,7 +14,7 @@ public class ConsolePrinter extends ValidatingService implements Printer {
      */
     @Override
     public void print(String message) {
-        if (isArgNotValid(message)) { return;}
+        isArgValid(message);
         System.out.println(message);
     }
 
