@@ -4,8 +4,10 @@ import com.tcs.edu.decorator.*;
 import com.tcs.edu.domain.Message;
 import com.tcs.edu.printer.ConsolePrinter;
 import com.tcs.edu.printer.Printer;
+import com.tcs.edu.validator.LogException;
+import com.tcs.edu.validator.ValidatingService;
 
-public class OrderedDistinctedMessageService implements MessageService {
+public class OrderedDistinctedMessageService extends ValidatingService implements MessageService {
     private final Printer printer;
     private final MessageDecorator decorator;
     private final SeverityLevelMapper levelMapper = new SeverityLevelMapper();
@@ -19,46 +21,62 @@ public class OrderedDistinctedMessageService implements MessageService {
         this(new ConsolePrinter(), new TimestampMessageDecorator());
     }
 
-        /**
-         * @param messageOrder порядок вывода сообщений
-         * @param doubling     признак дедупликации сообщений
-         * @param messages     список объектов Message
-         * @apiNote Сервис преобразования сообщений и вывода
-         */
+    /**
+     * @param messageOrder порядок вывода сообщений
+     * @param doubling     признак дедупликации сообщений
+     * @param messages     список объектов Message
+     * @apiNote Сервис преобразования сообщений и вывода
+     */
     @Override
-    public void log(MessageOrder messageOrder, Doubling doubling, Message... messages) {
-        if (doubling != null) {
-            if (doubling.equals(Doubling.DOUBLES)) {
-                log(messageOrder, messages);
-            } else if (doubling.equals(Doubling.DISTINCT)) {
-                log(messageOrder, deduplicate(messages));
-            }
+    public void log(MessageOrder messageOrder, Doubling doubling, Message... messages)
+            throws LogException {
+        try {
+            super.isArgValid(doubling);
+        } catch (IllegalArgumentException e) {
+            throw new LogException("notValidArgMessage", e);
+        }
+        if (doubling.equals(Doubling.DOUBLES)) {
+            log(messageOrder, messages);
+        } else if (doubling.equals(Doubling.DISTINCT)) {
+            log(messageOrder, deduplicate(messages));
         }
     }
 
     @Override
     public void log(MessageOrder messageOrder, Message... messages) {
-        if (messageOrder != null) {
-            if (messageOrder.equals(MessageOrder.ASC)) {
-                log(messages);
-            } else if (messageOrder.equals(MessageOrder.DESC)) {
-                log(reverse(messages));
-            }
+        try {
+            super.isArgValid(messageOrder);
+        } catch (IllegalArgumentException e) {
+            throw new LogException("notValidArgMessage", e);
+        }
+        if (messageOrder.equals(MessageOrder.ASC)) {
+            log(messages);
+        } else if (messageOrder.equals(MessageOrder.DESC)) {
+            log(reverse(messages));
         }
     }
 
     @Override
     public void log(Message... messages) {
-        if (messages != null && messages.length != 0) {
-            for (Message currentMessage : messages) {
-                if (currentMessage != null) {
-                    printer.print(decorator.decorate(String.format("%s %s", currentMessage.getBody(),
-                            levelMapper.mapToString(currentMessage.getSeverity()))));
-                }
-            }
-            decorator.resetCounter();
-            System.out.println("-----------------------------------------------------");
+        try {
+            super.isArgValid(messages);
+        } catch (IllegalArgumentException e) {
+            throw new LogException("notValidArgMessage", e);
         }
+        for (Message currentMessage : messages) {
+            try {
+                super.isArgValid(currentMessage);
+            } catch (IllegalArgumentException e) {
+                throw new LogException("notValidArgMessage", e);
+            }
+        }
+        for (Message currentMessage : messages) {
+            printer.print(decorator.decorate(String.format("%s %s", currentMessage.getBody(),
+                    levelMapper.mapToString(currentMessage.getSeverity()))));
+        }
+
+        decorator.resetCounter();
+        System.out.println("-----------------------------------------------------");
     }
 
     @Override

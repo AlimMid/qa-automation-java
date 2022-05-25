@@ -3,11 +3,11 @@ package com.tcs.edu.printer;
 import com.tcs.edu.validator.ValidatingService;
 
 /**
- * @author Midov Alim
  * @version 1.0.0
- * @apiNote Класс com.tcs.edu.printer.ConsolePrinter предназначен для вывода информации на консоль
+ * @apiNote Класс com.tcs.edu.printer.FilePrinter предназначен для вывода информации в файл
  */
-public class ConsolePrinter extends ValidatingService implements Printer {
+public class FilePrinter extends ValidatingService implements Printer {
+
     /**
      * @param message тип String
      * @apiNote Метод предназначен для вывода сообщения передаваемого в качестве аргумента
@@ -15,7 +15,5 @@ public class ConsolePrinter extends ValidatingService implements Printer {
     @Override
     public void print(String message) {
         isArgValid(message);
-        System.out.println(message);
     }
-
 }
