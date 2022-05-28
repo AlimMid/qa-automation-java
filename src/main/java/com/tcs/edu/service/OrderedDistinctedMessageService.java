@@ -2,23 +2,25 @@ package com.tcs.edu.service;
 
 import com.tcs.edu.decorator.*;
 import com.tcs.edu.domain.Message;
-import com.tcs.edu.printer.ConsolePrinter;
-import com.tcs.edu.printer.Printer;
+import com.tcs.edu.repository.HashMapMessageRepository;
+import com.tcs.edu.repository.MessageRepository;
 import com.tcs.edu.validator.LogException;
 import com.tcs.edu.validator.ValidatingService;
 
+import java.util.UUID;
+
 public class OrderedDistinctedMessageService extends ValidatingService implements MessageService {
-    private final Printer printer;
+    private final MessageRepository messageRepository;
     private final MessageDecorator decorator;
     private final SeverityLevelMapper levelMapper = new SeverityLevelMapper();
 
-    public OrderedDistinctedMessageService(Printer printer, MessageDecorator decorator) {
-        this.printer = printer;
+    public OrderedDistinctedMessageService(MessageRepository messageRepository, MessageDecorator decorator) {
+        this.messageRepository = messageRepository;
         this.decorator = decorator;
     }
 
     public OrderedDistinctedMessageService() {
-        this(new ConsolePrinter(), new TimestampMessageDecorator());
+        this(new HashMapMessageRepository(), new TimestampMessageDecorator());
     }
 
     /**
@@ -32,13 +34,13 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
             throws LogException {
         try {
             super.isArgValid(doubling);
+            if (doubling.equals(Doubling.DOUBLES)) {
+                log(messageOrder, messages);
+            } else if (doubling.equals(Doubling.DISTINCT)) {
+                log(messageOrder, deduplicate(messages));
+            }
         } catch (IllegalArgumentException e) {
             throw new LogException("notValidArgMessage", e);
-        }
-        if (doubling.equals(Doubling.DOUBLES)) {
-            log(messageOrder, messages);
-        } else if (doubling.equals(Doubling.DISTINCT)) {
-            log(messageOrder, deduplicate(messages));
         }
     }
 
@@ -46,13 +48,13 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
     public void log(MessageOrder messageOrder, Message... messages) {
         try {
             super.isArgValid(messageOrder);
+            if (messageOrder.equals(MessageOrder.ASC)) {
+                log(messages);
+            } else if (messageOrder.equals(MessageOrder.DESC)) {
+                log(reverse(messages));
+            }
         } catch (IllegalArgumentException e) {
             throw new LogException("notValidArgMessage", e);
-        }
-        if (messageOrder.equals(MessageOrder.ASC)) {
-            log(messages);
-        } else if (messageOrder.equals(MessageOrder.DESC)) {
-            log(reverse(messages));
         }
     }
 
@@ -60,23 +62,17 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
     public void log(Message... messages) {
         try {
             super.isArgValid(messages);
-        } catch (IllegalArgumentException e) {
+            for (Message currentMessage : messages) {
+                super.isArgValid(currentMessage);
+                Message logMessage = new Message(currentMessage.getSeverity(),
+                        currentMessage.getBody());
+                logMessage.setBody(String.format("%s %s", currentMessage.getBody(),
+                        levelMapper.mapToString(currentMessage.getSeverity())));
+                messageRepository.create(decorator.decorate(logMessage));
+            }
+        } catch (IllegalArgumentException | NullPointerException e) {
             throw new LogException("notValidArgMessage", e);
         }
-        for (Message currentMessage : messages) {
-            try {
-                super.isArgValid(currentMessage);
-            } catch (IllegalArgumentException e) {
-                throw new LogException("notValidArgMessage", e);
-            }
-        }
-        for (Message currentMessage : messages) {
-            printer.print(decorator.decorate(String.format("%s %s", currentMessage.getBody(),
-                    levelMapper.mapToString(currentMessage.getSeverity()))));
-        }
-
-        decorator.resetCounter();
-        System.out.println("-----------------------------------------------------");
     }
 
     @Override
