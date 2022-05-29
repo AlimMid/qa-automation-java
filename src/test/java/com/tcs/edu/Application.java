@@ -112,10 +112,15 @@ class Application {
 
         // блок позитивных кейсов
         messageService.log(ASC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
-        messageService.log(DESC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
-        messageService.log(DOUBLES, messageMin, messageReg, messageReg);
-        messageService.log(ASC, messageMin, messageReg, messageReg);
-        messageService.log(messageMin, messageReg, messageMin, messageDef);
+        System.out.println(messageService.findByPrimaryKey(messageMin.getId()));
+        System.out.println(messageService.findByPrimaryKey(messageReg.getId()));
+        System.out.println(messageService.findByPrimaryKey(messageMaj.getId()));
+        System.out.println(messageService.findByPrimaryKey(messageDef.getId()));
+
+//        messageService.log(DESC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
+//        messageService.log(DOUBLES, messageMin, messageReg, messageReg);
+//        messageService.log(ASC, messageMin, messageReg, messageReg);
+//        messageService.log(messageMin, messageReg, messageMin, messageDef);
 
         // task9.2: тесты
 //        Message minorWarning1 = new Message(MINOR, "This is a warning");

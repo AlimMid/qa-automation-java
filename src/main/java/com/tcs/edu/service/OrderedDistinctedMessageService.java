@@ -23,6 +23,10 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
         this(new HashMapMessageRepository(), new TimestampMessageDecorator());
     }
 
+    public Message findByPrimaryKey(UUID key) {
+        return messageRepository.findByPrimaryKey(key);
+    }
+
     /**
      * @param messageOrder порядок вывода сообщений
      * @param doubling     признак дедупликации сообщений
@@ -64,11 +68,9 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
             super.isArgValid(messages);
             for (Message currentMessage : messages) {
                 super.isArgValid(currentMessage);
-                Message logMessage = new Message(currentMessage.getSeverity(),
-                        currentMessage.getBody());
-                logMessage.setBody(String.format("%s %s", currentMessage.getBody(),
+                currentMessage.setBody(String.format("%s %s", currentMessage.getBody(),
                         levelMapper.mapToString(currentMessage.getSeverity())));
-                messageRepository.create(decorator.decorate(logMessage));
+                messageRepository.create(decorator.decorate(currentMessage));
             }
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new LogException("notValidArgMessage", e);

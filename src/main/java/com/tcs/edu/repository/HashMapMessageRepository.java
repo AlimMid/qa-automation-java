@@ -18,6 +18,6 @@ public class HashMapMessageRepository implements MessageRepository{
 
     @Override
     public Message findByPrimaryKey(UUID key) {
-        return null;
+        return messages.get(key);
     }
 }
