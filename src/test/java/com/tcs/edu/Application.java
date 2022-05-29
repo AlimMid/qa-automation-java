@@ -113,6 +113,15 @@ class Application {
         // блок позитивных кейсов
         messageService.log(ASC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
         System.out.println(messageService.findAll());
+        System.out.println("-----------------------------");
+        System.out.println(messageService.findBySeverity(messageMin.getSeverity()));
+        System.out.println("-----------------------------");
+        System.out.println(messageService.findBySeverity(messageMaj.getSeverity()));
+        System.out.println("-----------------------------");
+        System.out.println(messageService.findBySeverity(messageReg.getSeverity()));
+        System.out.println("-----------------------------");
+        System.out.println(messageService.findBySeverity(messageDef.getSeverity()));
+
 //        System.out.println(messageService.findByPrimaryKey(messageMin.getId()));
 //        System.out.println(messageService.findByPrimaryKey(messageReg.getId()));
 //        System.out.println(messageService.findByPrimaryKey(messageMaj.getId()));
