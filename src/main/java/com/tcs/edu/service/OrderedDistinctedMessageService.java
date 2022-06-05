@@ -80,9 +80,7 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
             super.isArgValid(messages);
             for (Message currentMessage : messages) {
                 super.isArgValid(currentMessage);
-                currentMessage.setBody(String.format("%s %s", currentMessage.getBody(),
-                        levelMapper.mapToString(currentMessage.getSeverity())));
-                messageRepository.create(decorator.decorate(currentMessage));
+                messageRepository.create(currentMessage);
             }
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new LogException("notValidArgMessage", e);
@@ -101,9 +99,10 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
      */
     private Message[] deduplicate(Message... messages) {
         Message[] messagesOutput = new Message[messages.length];
+        int k = 0;
         if (messages.length != 0) {
             messagesOutput[0] = messages[0];
-            int k = 1;
+            k = 1;
             for (int i = 1; i < messages.length; i++) {
                 if (!checkContains(messages[i], messagesOutput)) {
                     messagesOutput[k] = messages[i];
@@ -111,7 +110,9 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
                 }
             }
         }
-        return messagesOutput;
+        Message[] messagesFinalOutput = new Message[k];
+        System.arraycopy(messagesOutput, 0, messagesFinalOutput, 0, k);
+        return messagesFinalOutput;
     }
 
     /**
