@@ -112,10 +112,11 @@ class Application {
 
         // блок позитивных кейсов
         messageService.log(ASC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
-        System.out.println(messageService.findByPrimaryKey(messageMin.getId()));
-        System.out.println(messageService.findByPrimaryKey(messageReg.getId()));
-        System.out.println(messageService.findByPrimaryKey(messageMaj.getId()));
-        System.out.println(messageService.findByPrimaryKey(messageDef.getId()));
+        System.out.println(messageService.findAll());
+//        System.out.println(messageService.findByPrimaryKey(messageMin.getId()));
+//        System.out.println(messageService.findByPrimaryKey(messageReg.getId()));
+//        System.out.println(messageService.findByPrimaryKey(messageMaj.getId()));
+//        System.out.println(messageService.findByPrimaryKey(messageDef.getId()));
 
 //        messageService.log(DESC, DOUBLES, messageMin, messageReg, messageMaj, messageDef);
 //        messageService.log(DOUBLES, messageMin, messageReg, messageReg);

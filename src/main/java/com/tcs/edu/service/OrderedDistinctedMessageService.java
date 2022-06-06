@@ -7,6 +7,7 @@ import com.tcs.edu.repository.MessageRepository;
 import com.tcs.edu.validator.LogException;
 import com.tcs.edu.validator.ValidatingService;
 
+import java.util.Collection;
 import java.util.UUID;
 
 public class OrderedDistinctedMessageService extends ValidatingService implements MessageService {
@@ -23,8 +24,14 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
         this(new HashMapMessageRepository(), new TimestampMessageDecorator());
     }
 
+    @Override
     public Message findByPrimaryKey(UUID key) {
         return messageRepository.findByPrimaryKey(key);
+    }
+
+    @Override
+    public Collection<Message> findAll() {
+        return messageRepository.findAll();
     }
 
     /**
