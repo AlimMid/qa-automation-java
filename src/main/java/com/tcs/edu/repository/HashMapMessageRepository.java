@@ -15,4 +15,9 @@ public class HashMapMessageRepository implements MessageRepository{
         messages.put(key, message);
         return key;
     }
+
+    @Override
+    public Message findByPrimaryKey(UUID key) {
+        return messages.get(key);
+    }
 }
