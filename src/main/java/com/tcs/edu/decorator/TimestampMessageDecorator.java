@@ -1,5 +1,7 @@
 package com.tcs.edu.decorator;
 
+import com.tcs.edu.domain.Message;
+
 import java.time.Instant;
 
 /**
@@ -17,21 +19,17 @@ public class TimestampMessageDecorator implements MessageDecorator{
      * @apiNote Метод содержит локальную переменную decoratedMessage, в которой хранится строка - склейка текущего времени и сообщения
      */
     @Override
-    public String decorate(String message) {
+    public Message decorate(Message message) {
         updateCounter();
-        var decoratedMessage = String.format("%3d %s %s", messageCount, Instant.now(), message);
+        var decoratedMessage = String.format("%3d %s %s", messageCount, Instant.now(), message.getBody());
         if (messageCount % PAGE_SIZE == 0) {
             decoratedMessage = String.format("%s%s", decoratedMessage, "\n---");
         }
-        return decoratedMessage;
+        message.setBody(decoratedMessage);
+        return message;
     }
 
     private void updateCounter() {
         messageCount++;
-    }
-
-    @Override
-    public void resetCounter() {
-        messageCount = 0;
     }
 }

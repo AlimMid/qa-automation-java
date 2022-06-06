@@ -1,9 +1,10 @@
 package com.tcs.edu.decorator;
 
+import com.tcs.edu.domain.Message;
+
 /**
  * Интерфейс декоратора сообщений
  */
 public interface MessageDecorator {
-    String decorate(String message);
-    void resetCounter();
+    Message decorate(Message message);
 }
