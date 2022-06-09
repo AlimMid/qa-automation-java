@@ -34,6 +34,11 @@ public class OrderedDistinctedMessageService extends ValidatingService implement
         return messageRepository.findAll();
     }
 
+    @Override
+    public Collection<Message> findBySeverity(Severity severity) {
+        return messageRepository.findBySeverity(severity);
+    }
+
     /**
      * @param messageOrder порядок вывода сообщений
      * @param doubling     признак дедупликации сообщений
