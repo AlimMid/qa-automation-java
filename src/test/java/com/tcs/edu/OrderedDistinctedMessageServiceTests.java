@@ -13,13 +13,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
 import static com.tcs.edu.decorator.Doubling.DISTINCT;
 import static com.tcs.edu.decorator.Doubling.DOUBLES;
 import static com.tcs.edu.decorator.MessageOrder.ASC;
 import static com.tcs.edu.decorator.MessageOrder.DESC;
-import static com.tcs.edu.decorator.Severity.MAJOR;
-import static com.tcs.edu.decorator.Severity.MINOR;
+import static com.tcs.edu.decorator.Severity.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,7 +52,7 @@ public class OrderedDistinctedMessageServiceTests {
     @DisplayName("Проверка валидации, когда doubling = null при незаданном messageOrder")
     public void checkValidationDoublingNullWhenOrderEmpty() {
         Message messageNotLogged = new Message("Не логируемое сообщение");
-        Throwable throwMessage = assertThrows(LogException.class, () -> messageService.log((Doubling) null, messageErr));
+        Throwable throwMessage = assertThrows(LogException.class, () -> messageService.log((Doubling) null, messageNotLogged));
         assertThat(throwMessage.getMessage()).isEqualTo("notValidArgMessage");
     }
 
@@ -63,7 +61,7 @@ public class OrderedDistinctedMessageServiceTests {
     @DisplayName("Проверка валидации, когда messageOrder = null при незаданном doubling")
     public void checkValidationOrderNullWhenDoublingEmpty() {
         Message messageNotLogged = new Message("Не логируемое сообщение");
-        Throwable throwMessage = assertThrows(LogException.class, () -> messageService.log((MessageOrder) null, messageErr));
+        Throwable throwMessage = assertThrows(LogException.class, () -> messageService.log((MessageOrder) null, messageNotLogged));
         assertThat(throwMessage.getMessage()).isEqualTo("notValidArgMessage");
     }
 
@@ -89,7 +87,7 @@ public class OrderedDistinctedMessageServiceTests {
     public void checkValidationMessagesContainEmptyMessage() {
         Message messageNotLogged = new Message("Не логируемое сообщение");
         Message messageEmpty = new Message("");
-        Throwable throwMessage = assertThrows(LogException.class, () -> messageService.log(ASC, DOUBLES, messageErr, messageEmpty));
+        Throwable throwMessage = assertThrows(LogException.class, () -> messageService.log(ASC, DOUBLES, messageNotLogged, messageEmpty));
         assertThat(throwMessage.getMessage()).isEqualTo("notValidArgMessage");
     }
 
@@ -104,25 +102,10 @@ public class OrderedDistinctedMessageServiceTests {
         int sizeBetween = messageService.findAll().size();
         messageService.log(ASC, DOUBLES, messageMaj);
         int sizeAfter = messageService.findAll().size();
-        assertEquals(sizeBefore + 1, sizeBetween, "Ожидается +1 элемент в коллекцию");
-        assertEquals(sizeBefore + 2, sizeAfter, "Ожидается +2 элемента в коллекцию");
+        assertThat(sizeBetween).isEqualTo(sizeBefore + 1);
+        assertThat(sizeAfter).isEqualTo(sizeBefore + 2);
         checkMessageById(messageService, messageMin);
         checkMessageById(messageService, messageMaj);
-
-        var messages = messageService.findAll();
-        assertThat(messages).isNotNull().hasSize(2);
-        var messMin = messages.stream()
-                .filter(m -> m.getId().equals(messageMin.getId()))
-                .collect(Collectors.toList());
-        var messMaj = messages.stream()
-                .filter(m -> m.getId().equals(messageMaj.getId()))
-                .collect(Collectors.toList());
-        assertThat(messMin).hasSize(1);
-        assertThat(messMin.get(0).getSeverity()).isEqualTo(messageMin.getSeverity());
-        assertThat(messMin.get(0).getBody()).isEqualTo(messageMin.getBody());
-        assertThat(messMaj).hasSize(1);
-        assertThat(messMaj.get(0).getSeverity()).isEqualTo(messageMaj.getSeverity());
-        assertThat(messMaj.get(0).getBody()).isEqualTo(messageMaj.getBody());
     }
 
     @Test
@@ -134,17 +117,9 @@ public class OrderedDistinctedMessageServiceTests {
         int sizeBefore = messageService.findAll().size();
         messageService.log(ASC, message1, message2);
         int sizeAfter = messageService.findAll().size();
-        assertEquals(sizeBefore + 2, sizeAfter, "Ожидается +2 элемента в коллекцию");
+        assertThat(sizeAfter).isEqualTo(sizeBefore + 2);
         checkMessageById(messageService, message1);
         checkMessageById(messageService, message2);
-
-        messageService.log(ASC, DOUBLES, messageMin, messageMin);
-        var messages = messageService.findAll();
-        assertThat(messages).isNotNull().hasSize(2);
-        for (var message : messages) {
-            assertThat(message.getSeverity()).isEqualTo(messageMin.getSeverity());
-            assertThat(message.getBody()).isEqualTo(messageMin.getBody());
-        }
     }
 
     @Test
@@ -157,22 +132,13 @@ public class OrderedDistinctedMessageServiceTests {
         int sizeBefore = messageService.findAll().size();
         messageService.log(ASC, DISTINCT, messageMin, messageReg);
         int sizeAfter = messageService.findAll().size();
-        assertEquals(sizeBefore + 1, sizeAfter);
+        assertThat(sizeAfter).isEqualTo(sizeBefore + 1);
         if (messageMin.getId() != null) {
-            assertNull(messageReg.getId(),
-                    "При дедубликации двух сообщений id должен сгенерироваться у одного и только одного сообщения");
+            assertThat(messageReg.getId()).isNull();
             checkMessageById(messageService, messageMin);
         } else {
-            assertNotNull(messageReg.getId(),
-                    "При дедубликации двух сообщений id должен сгенерироваться у одного и только одного сообщения");
+            assertThat(messageReg.getId()).isNotNull();
             checkMessageById(messageService, messageReg);
-
-        messageService.log(ASC, DISTINCT, messageMin, messageMin);
-        var messages = messageService.findAll();
-        assertThat(messages).isNotNull().hasSize(1);
-        for (var message : messages) {
-            assertThat(message.getSeverity()).isEqualTo(messageMin.getSeverity());
-            assertThat(message.getBody()).isEqualTo(messageMin.getBody());
         }
     }
 
@@ -185,24 +151,17 @@ public class OrderedDistinctedMessageServiceTests {
         int sizeBefore = messageService.findAll().size();
         messageService.log(ASC, messageMin, messageReg);
         int sizeAfter = messageService.findAll().size();
-        assertEquals(sizeBefore + 2, sizeAfter, "Ожидается +2 элемента в коллекцию");
+        assertThat(sizeAfter).isEqualTo(sizeBefore + 2);
         checkMessageById(messageService, messageMin);
         checkMessageById(messageService, messageReg);
     }
 
     @Step("Проверка что сообщение записалось с корректными параметрами")
     private void checkMessageById(MessageService service, Message message) {
-        assertNotNull(message.getId(), "id сообщения должно быть сгенерировано");
+        assertThat(message.getId()).isNotNull();
         Message messageFromService = service.findByPrimaryKey(message.getId());
-        assertNotNull(messageFromService, "Мессадж должен быть записан в коллекцию");
-        assertEquals(message.getSeverity(), messageFromService.getSeverity(), "Некорректный Severity");
-        assertEquals(message.getBody(), messageFromService.getBody(), "Некорректный body");
-        messageService.log(ASC, messageMin, messageMin);
-        var messages = messageService.findAll();
-        assertThat(messages).isNotNull().hasSize(2);
-        for (var message : messages) {
-            assertThat(message.getSeverity()).isEqualTo(messageMin.getSeverity());
-            assertThat(message.getBody()).isEqualTo(messageMin.getBody());
-        }
+        assertThat(messageFromService).isNotNull();
+        assertThat(messageFromService.getSeverity()).isEqualTo(message.getSeverity());
+        assertThat(messageFromService.getBody()).isEqualTo(message.getBody());
     }
 }
