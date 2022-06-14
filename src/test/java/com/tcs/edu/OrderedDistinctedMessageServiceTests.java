@@ -11,7 +11,6 @@ import com.tcs.edu.validator.LogException;
 import io.qameta.allure.Step;
 import org.junit.jupiter.api.*;
 
-
 import static com.tcs.edu.decorator.Doubling.DISTINCT;
 import static com.tcs.edu.decorator.Doubling.DOUBLES;
 import static com.tcs.edu.decorator.MessageOrder.ASC;
