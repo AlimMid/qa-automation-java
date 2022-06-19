@@ -9,40 +9,44 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GetCountriesTests {
+public class GetCountriesIdTests {
     static final String token = getToken();
-    static List<Integer> ids = new ArrayList<>();
-
-//    @BeforeAll
-//    public static void setUpAuth() {
-//        PreemptiveBasicAuthScheme authScheme = new PreemptiveBasicAuthScheme();
-//        authScheme.setUserName("admin");
-//        authScheme.setPassword("admin");
-//    }
+    static List<Integer> countryIds = new ArrayList<>();
+    private static Connection connection;
+    private static Integer countryId;
+    private static String countryName;
 
     @BeforeAll
-    public static void setUpErrorLogging() {
+    public static void connect() throws SQLException {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        connection = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/app-db",
+                "app-db-admin",
+                "mysecretpassword"
+        );
+        countryName = getRandomUniqCountryName();
+        countryId = addCountryToDb(countryName);
     }
 
     @AfterAll
-    public static void deleteTestData() {
+    public static void disconnect() throws SQLException {
+        deleteTestDataFromDb(countryIds);
+        connection.close();
+    }
+
+    @Step("Удаление тестовых записей из БД")
+    public static void deleteTestDataFromDb(List<Integer> ids) throws SQLException {
         for (int id : ids) {
-            given()
-                    .header("Authorization", "Bearer " + token)
-                    .when()
-                    .delete("/api/countries/" + id)
-                    .then()
-                    .statusCode(204);
+            PreparedStatement sql = connection.prepareStatement("delete from country c where c.id = ?");
+            sql.setInt(1, id);
+            System.out.println(sql);
+            sql.executeUpdate();
         }
     }
 
@@ -51,15 +55,16 @@ public class GetCountriesTests {
     public void shouldErrorWithoutToken() {
         given()
                 .contentType("application/json")
+                .pathParam("id", countryId)
                 .when()
-                .get("/api/countries")
+                .get("/api/countries/{id}")
                 .then()
                 .statusCode(401)
                 .body("type", notNullValue(),
                         "title", is("Unauthorized"),
                         "status", is(401),
                         "detail", is("Full authentication is required to access this resource"),
-                        "path", is("/api/countries"),
+                        "path", is("/api/countries/" + countryId),
                         "message", is("error.http.401"));
     }
 
@@ -69,64 +74,58 @@ public class GetCountriesTests {
         given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + RandomStringUtils.randomAlphanumeric(50))
+                .pathParam("id", countryId)
                 .when()
-                .get("/api/countries")
+                .get("/api/countries/{id}")
                 .then()
                 .statusCode(401)
                 .body("type", notNullValue(),
                         "title", is("Unauthorized"),
                         "status", is(401),
                         "detail", is("Full authentication is required to access this resource"),
-                        "path", is("/api/countries"),
+                        "path", is("/api/countries/" + countryId),
                         "message", is("error.http.401"));
     }
 
     @Test
-    @DisplayName("Проверка ответа при отправке запроса с корректным токеном без параметров")
+    @DisplayName("Проверка ответа при отправке запроса с корректным токеном и существующим id")
     public void should200WithoutParams() {
         given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + token)
+                .pathParam("id", countryId)
                 .when()
-                .get("/api/countries")
+                .get("/api/countries/{id}")
                 .then()
                 .statusCode(200)
-                .body("[0].id", notNullValue(),
-                        "[0].countryName", notNullValue(),
-                        "[0].locations", anything());
+                .body("id", is(countryId),
+                        "countryName", is(countryName),
+                        "locations", is(nullValue()));
     }
 
     @Test
-    @DisplayName("Проверка, что добавленный элемент отображается в списке элементов в ответе")
-    public void shouldGiveAddedElement() {
-        JsonPath response = given()
+    @DisplayName("Проверка ответа при отправке запроса с несуществующим id")
+    public void should200WithNonExistId() {
+        Integer nonExistId = countryId + 1;
+        given()
                 .contentType("application/json")
                 .header("Authorization", "Bearer " + token)
+                .pathParam("id", nonExistId)
                 .when()
-                .get("/api/countries")
+                .get("/api/countries/{id}")
                 .then()
-                .statusCode(200)
-                .extract()
-                .jsonPath();
-        int countBefore = response.getList("").size();
-        List<Map<String, Object>> countryList = response.getList("");
-        String countryName = getRandomUniqCountryName(getCountryNames(countryList));
-        addCountry(countryName);
-        JsonPath responseAfterAdd = given()
-                .contentType("application/json")
-                .header("Authorization", "Bearer " + token)
-                .when()
-                .get("/api/countries")
-                .then()
-                .statusCode(200)
-                .body("[" + countBefore + "].countryName", is(countryName))
-                .extract()
-                .jsonPath();
-        assertEquals(countBefore + 1, responseAfterAdd.getList("").size(), "Должна добавиться 1 страна");
+                .statusCode(404)
+                .body("type", notNullValue(),
+                        "title", is("Not Found"),
+                        "status", is(404),
+                        "detail", is("404 NOT_FOUND"),
+                        "path", is("/api/countries/" + nonExistId),
+                        "message", is("error.http.404"));
     }
 
     @Step("Генерация уникального названия страны")
-    static private String getRandomUniqCountryName(List<String> countryNames) {
+    static private String getRandomUniqCountryName() throws SQLException {
+        List<String> countryNames = getCountryNamesFromDb();
         List<String> possibleNames = new ArrayList<>();
         for (char i = 'A'; i <= 'Z'; i++) {
             for (char j = 'A'; j <= 'Z'; j++) {
@@ -139,49 +138,37 @@ public class GetCountriesTests {
         return possibleNames.get((int) index);
     }
 
+    @Step("Получение следующего незанятого id страны списка стран")
+    static private Integer getNextCountryIdFromDb() throws SQLException {
+        PreparedStatement sql = connection.prepareStatement("select max(id) from country");
+        ResultSet rs = sql.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) + 1;
+        } else {
+            return 1;
+        }
+    }
+
     @Step("Получение списка названий стран")
-    static private List<String> getCountryNames(List<Map<String, Object>> countryList) {
+    static private List<String> getCountryNamesFromDb() throws SQLException {
         List<String> countryNames = new ArrayList<>();
-        for (var country : countryList) {
-            if (country.get("countryName") != null) {
-                countryNames.add(country.get("countryName").toString());
-            }
+        PreparedStatement sql = connection.prepareStatement("select * from country");
+        ResultSet rs = sql.executeQuery();
+        while (rs.next()) {
+            countryNames.add(rs.getString(2));
         }
         return countryNames;
     }
 
-    @Step("Получение следующего незанятого id страны списка стран")
-    static private Integer getNextId(List<Map<String, Object>> countryList) {
-        if (countryList == null) {
-            return null;
-        }
-        if (countryList.size() == 0) {
-            return 1;
-        }
-        int idMax = Integer.parseInt(countryList.get(0).get("id").toString());
-        for (var country : countryList) {
-            if (Integer.parseInt(country.get("id").toString()) > idMax) {
-                idMax = Integer.parseInt(country.get("id").toString());
-            }
-        }
-        return idMax + 1;
-    }
-
     @Step("Добавление страны в список стран")
-    static private void addCountry(String name) {
-        JsonPath response = given()
-                .contentType("application/json")
-                .header("Authorization", "Bearer " + token)
-                .body("{\n" +
-                        "  \"countryName\": \"" + name + "\"\n" +
-                        "}\n")
-                .when()
-                .post("/api/countries")
-                .then()
-                .statusCode(201)
-                .extract()
-                .jsonPath();
-        ids.add(response.getInt("id"));
+    static private int addCountryToDb(String name) throws SQLException {
+        int id = getNextCountryIdFromDb();
+        PreparedStatement sql = connection.prepareStatement("insert into country (id, country_name) values (?, ?)");
+        sql.setInt(1, id);
+        sql.setString(2, name);
+        sql.executeUpdate();
+        countryIds.add(id);
+        return id;
     }
 
     @Step("Получение токена")
