@@ -138,17 +138,6 @@ public class GetCountriesIdTests {
         return possibleNames.get((int) index);
     }
 
-    @Step("Получение следующего незанятого id страны списка стран")
-    static private Integer getNextCountryIdFromDb() throws SQLException {
-        PreparedStatement sql = connection.prepareStatement("select max(id) from country");
-        ResultSet rs = sql.executeQuery();
-        if (rs.next()) {
-            return rs.getInt(1) + 1;
-        } else {
-            return 1;
-        }
-    }
-
     @Step("Получение списка названий стран")
     static private List<String> getCountryNamesFromDb() throws SQLException {
         List<String> countryNames = new ArrayList<>();
@@ -162,11 +151,15 @@ public class GetCountriesIdTests {
 
     @Step("Добавление страны в список стран")
     static private int addCountryToDb(String name) throws SQLException {
-        int id = getNextCountryIdFromDb();
-        PreparedStatement sql = connection.prepareStatement("insert into country (id, country_name) values (?, ?)");
-        sql.setInt(1, id);
-        sql.setString(2, name);
+        PreparedStatement sql = connection.prepareStatement(
+                "insert into country (country_name) values (?)",
+                Statement.RETURN_GENERATED_KEYS);
+        sql.setString(1, name);
         sql.executeUpdate();
+
+        ResultSet keys = sql.getGeneratedKeys();
+        keys.next();
+        int id = keys.getInt(1);
         countryIds.add(id);
         return id;
     }
