@@ -1,63 +1,33 @@
 Prerequisites
 =============
+Install [Docker Desktop](https://docs.docker.com/desktop/)
+
+Download app release
+====================
+Download [pre-built jar](https://www.dropbox.com/s/g0er6zwnsycdrc5/app-dev.jar) to `app.codegen/build/app.jar`
+
+Build the Docker image
+======================
 ```shell
-sudo yum install -y java-11-openjdk-devel nodejs
-sudo npm install -g generator-jhipster
+cd app.codegen
+docker buildx build --tag tinkoff-edu-app:1.0.0 .
 ```
 
+Run containerized app
+=====================
 ```shell
-cd app
+docker run --detach --publish 8080:8080 tinkoff-edu-app:1.0.0
 ```
 
-(for Mac only)
+API info
+========
+- [Main page](http://localhost:8080)
+- [Swagger UI](http://localhost:8080/admin/docs)
+- [OpenAPI spec](http://localhost:8080/v3/api-docs/springdocDefault)
+
+Stop and delete containerized app
+=================================
 ```shell
-export DOCKER_BUILDKIT=0
-export COMPOSE_DOCKER_CLI_BUILD=0
-```
-
-Build
-=====
-```shell
-app> 
-  mkdir build && \
-  cd "$_" && \
-  jhipster --no-insight jdl ../app.jdl && \
-  ./mvnw -Pprod,api-docs verify -DskipTests && \
-  cd .. && \
-  docker buildx build --platform linux/amd64 --tag ekr26/tinkoff-edu-app:1.0.0 .
-
-app>
-  rm -rf build
-```
-
-Push
-====
-```shell
-docker push ekr26/tinkoff-edu-app:1.0.0
-```
-
-
-Run
-====
-
-Start cluster
---------------
-```shell
-app>
-  docker stack deploy --compose-file docker-compose.yml app
-```
-
-Cluster info
-------------
-```shell
-docker stack ls
-docker stack ps app
-docker stack services app
-
-```
-
-Stop cluster
-------------
-```shell
-docker stack rm app
+docker ps
+docker rm --force <NAME>
 ```
